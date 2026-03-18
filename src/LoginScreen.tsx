@@ -3,50 +3,53 @@ import { supabase } from './supabaseClient';
 import logo from './assets/golden-snake-logo.png';
 
 export default function LoginScreen() {
-const [email, setEmail] = useState('');
-const [password, setPassword] = useState('');
-const [username, setUsername] = useState('');
-const [isRegister, setIsRegister] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState<'error' | 'success'>('error');
 
-async function ensureUserProfile(userId: string, userEmail: string, chosenUsername?: string) {
-  const emailName = userEmail.split('@')[0] || 'Utente';
-  const fallbackName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-  const normalizedUsername = chosenUsername?.trim() || fallbackName;
+  async function ensureUserProfile(userId: string, userEmail: string, chosenUsername?: string) {
+    const emailName = userEmail.split('@')[0] || 'Utente';
+    const fallbackName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+    const normalizedUsername = chosenUsername?.trim() || fallbackName;
 
-  await supabase.from('user_profiles').upsert(
-    {
-      id: userId,
-      first_name: normalizedUsername,
-      username: normalizedUsername,
-      custom_categories: [],
-    },
-    { onConflict: 'id' }
-  );
-}
+    await supabase.from('user_profiles').upsert(
+      {
+        id: userId,
+        first_name: normalizedUsername,
+        username: normalizedUsername,
+        custom_categories: [],
+      },
+      { onConflict: 'id' }
+    );
+  }
 
   async function handleSubmit() {
     setMsg('');
 
-if (!email.trim() || !password.trim()) {
-  setMsgType('error');
-  setMsg('Inserisci email e password.');
-  return;
-}
+    if (!email.trim() || !password.trim()) {
+      setMsgType('error');
+      setMsg('Inserisci email e password.');
+      return;
+    }
 
-if (isRegister && !username.trim()) {
-  setMsgType('error');
-  setMsg('Inserisci un nome utente.');
-  return;
-}
+    if (isRegister && !username.trim()) {
+      setMsgType('error');
+      setMsg('Inserisci un nome utente.');
+      return;
+    }
 
     setLoading(true);
 
     try {
       if (isRegister) {
-        const { data, error } = await supabase.auth.signUp({ email: email.trim(), password });
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+        });
 
         if (error) {
           setMsgType('error');
@@ -55,24 +58,28 @@ if (isRegister && !username.trim()) {
           return;
         }
 
-  const userId = data.user?.id;
-  if (userId) {
-    await ensureUserProfile(userId, email.trim(), username.trim());
-  }
+        const userId = data.user?.id;
+        if (userId) {
+          await ensureUserProfile(userId, email.trim(), username.trim());
+        }
 
         const hasSession = !!data.session;
         setMsgType('success');
         setMsg(
           hasSession
-            ? 'Registrazione completata! Ora puoi usare l\'app.'
+            ? "Registrazione completata! Ora puoi usare l'app."
             : 'Registrazione completata! Controlla la mail di conferma prima di accedere.'
         );
         setIsRegister(false);
+        setUsername('');
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
       if (error) {
         const lower = error.message.toLowerCase();
@@ -109,6 +116,7 @@ if (isRegister && !username.trim()) {
     }
 
     setLoading(true);
+
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: window.location.origin,
     });
@@ -145,27 +153,27 @@ if (isRegister && !username.trim()) {
       <div style={styles.card}>
         <img src={logo} alt="SalvadaNoi logo" style={styles.logo} />
 
-  <h1 style={styles.title}>SalvadaNoi</h1>
-<p style={styles.subtitle}>Il vostro risparmio, insieme. 🐍</p>
+        <h1 style={styles.title}>SalvadaNoi</h1>
+        <p style={styles.subtitle}>Il vostro risparmio, insieme. 🐍</p>
 
-<h1 style={styles.title}>SalvadaNoi</h1>
-<p style={styles.subtitle}>Il vostro risparmio, insieme. 🐍</p>
+        {isRegister ? (
+          <input
+            style={styles.input}
+            placeholder="Nome utente"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoComplete="nickname"
+          />
+        ) : null}
 
-<input style={styles.input} placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-        
-{isRegister ? (
-  <input
-    style={styles.input}
-    placeholder="Nome utente"
-    value={username}
-    onChange={(e) => setUsername(e.target.value)}
-    autoComplete="nickname"
-  />
-) : null}
+        <input
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+        />
 
-<input style={styles.input} placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-        
-        
         <input
           style={styles.input}
           type="password"
@@ -207,10 +215,12 @@ if (isRegister && !username.trim()) {
           <span
             style={styles.link}
             onClick={() => {
-            setMsg('');
-            setUsername('');
-            setIsRegister(!isRegister);
-          }}
+              setMsg('');
+              setUsername('');
+              setEmail('');
+              setPassword('');
+              setIsRegister(!isRegister);
+            }}
           >
             {isRegister ? ' Accedi' : ' Registrati'}
           </span>
