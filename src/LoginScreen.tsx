@@ -30,11 +30,17 @@ async function ensureUserProfile(userId: string, userEmail: string, chosenUserna
   async function handleSubmit() {
     setMsg('');
 
-    if (!email.trim() || !password.trim()) {
-      setMsgType('error');
-      setMsg('Inserisci email e password.');
-      return;
-    }
+if (!email.trim() || !password.trim()) {
+  setMsgType('error');
+  setMsg('Inserisci email e password.');
+  return;
+}
+
+if (isRegister && !username.trim()) {
+  setMsgType('error');
+  setMsg('Inserisci un nome utente.');
+  return;
+}
 
     setLoading(true);
 
