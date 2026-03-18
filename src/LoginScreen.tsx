@@ -3,9 +3,10 @@ import { supabase } from './supabaseClient';
 import logo from './assets/golden-snake-logo.png';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isRegister, setIsRegister] = useState(false);
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const [username, setUsername] = useState('');
+const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState<'error' | 'success'>('error');
