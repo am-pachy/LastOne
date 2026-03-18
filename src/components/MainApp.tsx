@@ -10,6 +10,11 @@ import { SezioneMovimenti } from './SezioneMovimenti';
 import { SezioneObiettivi } from './SezioneObiettivi';
 import { SezioneSaldo } from './SezioneSaldo';
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
+
 export function MainApp({ userId }: { userId: string }) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('movimenti');
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -19,6 +24,7 @@ export function MainApp({ userId }: { userId: string }) {
   const [budgets, setBudgets] = useState<BudgetRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<ToastState>(null);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   const showToast = (text: string, type: ToastType) => {
     setToast({ text, type });
@@ -49,6 +55,20 @@ export function MainApp({ userId }: { userId: string }) {
     loadData();
   }, [userId]);
 
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const e = event as BeforeInstallPromptEvent;
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
+  }, []);
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -56,6 +76,23 @@ export function MainApp({ userId }: { userId: string }) {
       showToast('Errore durante il logout.', 'error');
     }
   };
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+
+    await installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+
+    if (choice.outcome === 'accepted') {
+      setInstallPrompt(null);
+      showToast('App installata con successo!', 'success');
+    }
+  };
+
+  const displayName =
+    (profile as (UserProfile & { username?: string }) | null)?.username ||
+    profile?.first_name ||
+    'Utente';
 
   return (
     <div style={s.page}>
@@ -81,10 +118,46 @@ export function MainApp({ userId }: { userId: string }) {
 
           <header style={s.header}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-              <div>
+              <div style={{ flex: 1 }}>
                 <h2 style={{ margin: 0, fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>
-                  Ciao, {(profile as (UserProfile & { username?: string }) | null)?.username || profile?.first_name || 'Utente'}! 🐍
+                  Ciao, {displayName}! 🐍
                 </h2>
+
+                {installPrompt ? (
+                  <div
+                    style={{
+                      marginTop: '12px',
+                      padding: '12px 16px',
+                      borderRadius: '16px',
+                      background: '#EEF2FF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '12px',
+                      boxShadow: '0 8px 24px rgba(74,108,247,0.08)',
+                    }}
+                  >
+                    <span style={{ fontSize: '14px', color: '#3730A3', fontWeight: 600 }}>
+                      Installa l’app per accesso rapido 🚀
+                    </span>
+
+                    <button
+                      onClick={handleInstallClick}
+                      style={{
+                        border: 'none',
+                        background: '#4A6CF7',
+                        color: 'white',
+                        padding: '8px 14px',
+                        borderRadius: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Installa
+                    </button>
+                  </div>
+                ) : null}
               </div>
 
               <button
@@ -97,6 +170,7 @@ export function MainApp({ userId }: { userId: string }) {
                   height: '44px',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.05)',
                   cursor: 'pointer',
+                  flexShrink: 0,
                 }}
               >
                 <LogOut size={18} color="#64748B" />
