@@ -1,8 +1,8 @@
-import Movimenti from "./components/SezioneMovimenti";
-import Debiti from "./components/SezioneDebiti";
-import Saldo from "./components/SezioneSaldo";
-import Budget from "./components/SezioneBudget";
-import Obiettivi from "./components/SezioneObiettivi"
+import { SezioneMovimenti } from './components/SezioneMovimenti';
+import { SezioneDebiti } from './components/SezioneDebiti';
+import { SezioneSaldo } from './components/SezioneSaldo';
+import { SezioneBudget } from './components/SezioneBudget';
+import { SezioneObiettivi } from './components/SezioneObiettivi';
 import { useEffect, useState } from 'react';
 import LoginScreen from './LoginScreen';
 import { MainApp } from './components/MainApp';
