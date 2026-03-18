@@ -55,10 +55,10 @@ if (isRegister && !username.trim()) {
           return;
         }
 
-        const userId = data.user?.id;
-        if (userId) {
-          await ensureUserProfile(userId, email.trim());
-        }
+  const userId = data.user?.id;
+  if (userId) {
+    await ensureUserProfile(userId, email.trim(), username.trim());
+  }
 
         const hasSession = !!data.session;
         setMsgType('success');
