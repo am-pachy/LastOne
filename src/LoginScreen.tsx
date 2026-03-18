@@ -148,6 +148,11 @@ if (isRegister && !username.trim()) {
   <h1 style={styles.title}>SalvadaNoi</h1>
 <p style={styles.subtitle}>Il vostro risparmio, insieme. 🐍</p>
 
+<h1 style={styles.title}>SalvadaNoi</h1>
+<p style={styles.subtitle}>Il vostro risparmio, insieme. 🐍</p>
+
+<input style={styles.input} placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+        
 {isRegister ? (
   <input
     style={styles.input}
