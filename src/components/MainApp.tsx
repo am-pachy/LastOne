@@ -56,6 +56,10 @@ export function MainApp({ userId }: { userId: string }) {
     }
   };
 
+  const firstName =
+    profile?.first_name ||
+    profile?.username ||
+    'Utente';
 
   return (
     <div style={s.page}>
