@@ -145,10 +145,22 @@ if (isRegister && !username.trim()) {
       <div style={styles.card}>
         <img src={logo} alt="SalvadaNoi logo" style={styles.logo} />
 
-        <h1 style={styles.title}>SalvadaNoi</h1>
-        <p style={styles.subtitle}>Il vostro risparmio, insieme. 🐍</p>
+  <h1 style={styles.title}>SalvadaNoi</h1>
+<p style={styles.subtitle}>Il vostro risparmio, insieme. 🐍</p>
 
-        <input style={styles.input} placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+{isRegister ? (
+  <input
+    style={styles.input}
+    placeholder="Nome utente"
+    value={username}
+    onChange={(e) => setUsername(e.target.value)}
+    autoComplete="nickname"
+  />
+) : null}
+
+<input style={styles.input} placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+        
+        
         <input
           style={styles.input}
           type="password"
