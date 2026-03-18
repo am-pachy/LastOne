@@ -56,8 +56,6 @@ export function MainApp({ userId }: { userId: string }) {
     }
   };
 
-  const firstName = profile?.first_name || 'Anna';
-  const partnerName = profile?.partner_name || 'Michele';
 
   return (
     <div style={s.page}>
@@ -85,7 +83,7 @@ export function MainApp({ userId }: { userId: string }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>Ciao, {firstName}! 🐍</h2>
-                <p style={{ margin: '8px 0 0', fontSize: '14px', color: '#94A3B8' }}>Insieme a {partnerName}</p>
+          
               </div>
 
               <button
