@@ -15,6 +15,13 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 };
 
+type ExtendedUserProfile = UserProfile & {
+  username?: string;
+  is_premium?: boolean;
+  trial_ends_at?: string | null;
+  subscription_plan?: string | null;
+};
+
 export function MainApp({ userId }: { userId: string }) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('movimenti');
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -89,10 +96,29 @@ export function MainApp({ userId }: { userId: string }) {
     }
   };
 
+  const typedProfile = profile as ExtendedUserProfile | null;
+
   const displayName =
-    (profile as (UserProfile & { username?: string }) | null)?.username ||
-    profile?.first_name ||
+    typedProfile?.username ||
+    typedProfile?.first_name ||
     'Utente';
+
+  const isTrialActive =
+    !!typedProfile?.trial_ends_at &&
+    new Date(typedProfile.trial_ends_at) > new Date();
+
+  const hasAccess = !!typedProfile?.is_premium || isTrialActive;
+
+  const remainingTrialDays =
+    typedProfile?.trial_ends_at
+      ? Math.max(
+          0,
+          Math.ceil(
+            (new Date(typedProfile.trial_ends_at).getTime() - Date.now()) /
+              (1000 * 60 * 60 * 24)
+          )
+        )
+      : 0;
 
   return (
     <div style={s.page}>
@@ -122,6 +148,70 @@ export function MainApp({ userId }: { userId: string }) {
                 <h2 style={{ margin: 0, fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>
                   Ciao, {displayName}! 🐍
                 </h2>
+
+                {!typedProfile?.is_premium && isTrialActive ? (
+                  <div
+                    style={{
+                      marginTop: '12px',
+                      padding: '12px 16px',
+                      borderRadius: '16px',
+                      background: '#FEF3C7',
+                      color: '#92400E',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    🎁 Prova gratuita attiva: ti restano {remainingTrialDays} giorni
+                  </div>
+                ) : null}
+
+                {!hasAccess ? (
+                  <div
+                    style={{
+                      marginTop: '12px',
+                      padding: '16px',
+                      borderRadius: '16px',
+                      background: '#EEF2FF',
+                      color: '#1E3A8A',
+                      boxShadow: '0 8px 24px rgba(74,108,247,0.08)',
+                    }}
+                  >
+                    <div style={{ fontSize: '15px', fontWeight: 700, marginBottom: '8px' }}>
+                      Il tuo periodo di prova è terminato
+                    </div>
+                    <div style={{ fontSize: '14px', marginBottom: '12px', lineHeight: 1.5 }}>
+                      Sblocca SalvadaNoi Premium a €0,99/mese oppure €9,99/anno.
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      <button
+                        style={{
+                          border: 'none',
+                          background: '#4A6CF7',
+                          color: 'white',
+                          padding: '10px 16px',
+                          borderRadius: '12px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Mensile €0,99
+                      </button>
+                      <button
+                        style={{
+                          border: '1px solid #C7D2FE',
+                          background: 'white',
+                          color: '#3730A3',
+                          padding: '10px 16px',
+                          borderRadius: '12px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Annuale €9,99
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
 
                 {installPrompt ? (
                   <div
@@ -185,7 +275,15 @@ export function MainApp({ userId }: { userId: string }) {
               </div>
             ) : null}
 
-            {!loading && activeTab === 'movimenti' && (
+            {!loading && !hasAccess ? (
+              <div style={s.card}>
+                <p style={{ margin: 0, color: '#64748B', lineHeight: 1.5 }}>
+                  La tua prova gratuita è terminata. Attiva Premium per continuare a usare tutte le funzioni.
+                </p>
+              </div>
+            ) : null}
+
+            {!loading && hasAccess && activeTab === 'movimenti' && (
               <SezioneMovimenti
                 userId={userId}
                 movements={movements}
@@ -195,13 +293,13 @@ export function MainApp({ userId }: { userId: string }) {
               />
             )}
 
-            {!loading && activeTab === 'debiti' && (
+            {!loading && hasAccess && activeTab === 'debiti' && (
               <SezioneDebiti userId={userId} debts={debts} onSaved={loadData} showToast={showToast} />
             )}
 
-            {!loading && activeTab === 'saldo' && <SezioneSaldo movements={movements} />}
+            {!loading && hasAccess && activeTab === 'saldo' && <SezioneSaldo movements={movements} />}
 
-            {!loading && activeTab === 'budget' && (
+            {!loading && hasAccess && activeTab === 'budget' && (
               <SezioneBudget
                 userId={userId}
                 budgets={budgets}
@@ -212,7 +310,7 @@ export function MainApp({ userId }: { userId: string }) {
               />
             )}
 
-            {!loading && activeTab === 'obiettivi' && (
+            {!loading && hasAccess && activeTab === 'obiettivi' && (
               <SezioneObiettivi userId={userId} goals={goals} onSaved={loadData} showToast={showToast} />
             )}
           </main>
