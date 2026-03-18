@@ -57,11 +57,6 @@ export function MainApp({ userId }: { userId: string }) {
     }
   };
 
-  const firstName =
-    (profile as (UserProfile & { username?: string }) | null)?.username ||
-    profile?.first_name ||
-    'Utente';
-
   return (
     <div style={s.page}>
       <div style={s.shell}>
@@ -88,7 +83,7 @@ export function MainApp({ userId }: { userId: string }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>
-                  Ciao, {firstName}! 🐍
+                  Ciao, {(profile as (UserProfile & { username?: string }) | null)?.username || profile?.first_name || 'Utente'}! 🐍
                 </h2>
               </div>
 
