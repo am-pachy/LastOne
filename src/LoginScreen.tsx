@@ -22,6 +22,9 @@ export default function LoginScreen() {
         first_name: normalizedUsername,
         username: normalizedUsername,
         custom_categories: [],
+        is_premium: false,
+        subscription_plan: null,
+        trial_ends_at: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
       },
       { onConflict: 'id' }
     );
@@ -67,7 +70,7 @@ export default function LoginScreen() {
         setMsgType('success');
         setMsg(
           hasSession
-            ? "Registrazione completata! Ora puoi usare l'app."
+            ? "Registrazione completata! Hai 10 giorni di prova gratuita."
             : 'Registrazione completata! Controlla la mail di conferma prima di accedere.'
         );
         setIsRegister(false);
