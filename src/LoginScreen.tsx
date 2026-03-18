@@ -11,20 +11,21 @@ const [isRegister, setIsRegister] = useState(false);
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState<'error' | 'success'>('error');
 
-  async function ensureUserProfile(userId: string, userEmail: string) {
-    const emailName = userEmail.split('@')[0] || 'Utente';
-    const normalizedName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+async function ensureUserProfile(userId: string, userEmail: string, chosenUsername?: string) {
+  const emailName = userEmail.split('@')[0] || 'Utente';
+  const fallbackName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+  const normalizedUsername = chosenUsername?.trim() || fallbackName;
 
-    await supabase.from('user_profiles').upsert(
-      {
-        id: userId,
-        first_name: normalizedName,
-        partner_name: null,
-        custom_categories: [],
-      },
-      { onConflict: 'id' }
-    );
-  }
+  await supabase.from('user_profiles').upsert(
+    {
+      id: userId,
+      first_name: normalizedUsername,
+      username: normalizedUsername,
+      custom_categories: [],
+    },
+    { onConflict: 'id' }
+  );
+}
 
   async function handleSubmit() {
     setMsg('');
