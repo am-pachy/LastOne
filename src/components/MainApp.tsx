@@ -16,8 +16,8 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 type ExtendedUserProfile = UserProfile & {
-  username?: string;
-  is_premium?: boolean;
+  username?: string | null;
+  is_premium?: boolean | null;
   trial_ends_at?: string | null;
   subscription_plan?: string | null;
 };
@@ -93,6 +93,26 @@ export function MainApp({ userId }: { userId: string }) {
     if (choice.outcome === 'accepted') {
       setInstallPrompt(null);
       showToast('App installata con successo!', 'success');
+    }
+  };
+
+  const startCheckout = async (plan: 'monthly' | 'yearly') => {
+    try {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan, userId }),
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        showToast(data.error || 'Errore pagamento', 'error');
+      }
+    } catch {
+      showToast('Errore pagamento', 'error');
     }
   };
 
@@ -184,6 +204,7 @@ export function MainApp({ userId }: { userId: string }) {
                     </div>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                       <button
+                        onClick={() => startCheckout('monthly')}
                         style={{
                           border: 'none',
                           background: '#4A6CF7',
@@ -197,6 +218,7 @@ export function MainApp({ userId }: { userId: string }) {
                         Mensile €0,99
                       </button>
                       <button
+                        onClick={() => startCheckout('yearly')}
                         style={{
                           border: '1px solid #C7D2FE',
                           background: 'white',
@@ -351,22 +373,3 @@ export function MainApp({ userId }: { userId: string }) {
     </div>
   );
 }
-const startCheckout = async (plan: 'monthly' | 'yearly') => {
-  try {
-    const res = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan, userId }),
-    });
-
-    const data = await res.json();
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      showToast('Errore pagamento', 'error');
-    }
-  } catch {
-    showToast('Errore pagamento', 'error');
-  }
-};
