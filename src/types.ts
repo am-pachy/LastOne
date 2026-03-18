@@ -17,7 +17,13 @@ export type UserProfile = {
   id: string;
   first_name: string | null;
   partner_name: string | null;
+  username: string | null;
   custom_categories: string[] | null;
+  is_premium: boolean | null;
+  trial_ends_at: string | null;
+  subscription_plan: string | null;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
 };
 
 export type MovementRow = {
