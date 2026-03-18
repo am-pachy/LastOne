@@ -351,3 +351,22 @@ export function MainApp({ userId }: { userId: string }) {
     </div>
   );
 }
+const startCheckout = async (plan: 'monthly' | 'yearly') => {
+  try {
+    const res = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan, userId }),
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('Errore pagamento', 'error');
+    }
+  } catch {
+    showToast('Errore pagamento', 'error');
+  }
+};
