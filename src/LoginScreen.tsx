@@ -190,9 +190,10 @@ if (isRegister && !username.trim()) {
           <span
             style={styles.link}
             onClick={() => {
-              setMsg('');
-              setIsRegister(!isRegister);
-            }}
+            setMsg('');
+            setUsername('');
+            setIsRegister(!isRegister);
+          }}
           >
             {isRegister ? ' Accedi' : ' Registrati'}
           </span>
