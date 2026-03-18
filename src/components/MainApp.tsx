@@ -27,6 +27,7 @@ export function MainApp({ userId }: { userId: string }) {
 
   const loadData = async () => {
     setLoading(true);
+
     const [profileRes, movementsRes, debtsRes, goalsRes, budgetsRes] = await Promise.all([
       supabase.from('user_profiles').select('*').eq('id', userId).maybeSingle(),
       supabase.from('movements').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
@@ -57,8 +58,8 @@ export function MainApp({ userId }: { userId: string }) {
   };
 
   const firstName =
+    (profile as (UserProfile & { username?: string }) | null)?.username ||
     profile?.first_name ||
-    profile?.username ||
     'Utente';
 
   return (
@@ -86,8 +87,9 @@ export function MainApp({ userId }: { userId: string }) {
           <header style={s.header}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>Ciao, {firstName}! 🐍</h2>
-          
+                <h2 style={{ margin: 0, fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>
+                  Ciao, {firstName}! 🐍
+                </h2>
               </div>
 
               <button
@@ -115,10 +117,21 @@ export function MainApp({ userId }: { userId: string }) {
             ) : null}
 
             {!loading && activeTab === 'movimenti' && (
-              <SezioneMovimenti userId={userId} movements={movements} customCategories={profile?.custom_categories ?? []} onSaved={loadData} showToast={showToast} />
+              <SezioneMovimenti
+                userId={userId}
+                movements={movements}
+                customCategories={profile?.custom_categories ?? []}
+                onSaved={loadData}
+                showToast={showToast}
+              />
             )}
-            {!loading && activeTab === 'debiti' && <SezioneDebiti userId={userId} debts={debts} onSaved={loadData} showToast={showToast} />}
+
+            {!loading && activeTab === 'debiti' && (
+              <SezioneDebiti userId={userId} debts={debts} onSaved={loadData} showToast={showToast} />
+            )}
+
             {!loading && activeTab === 'saldo' && <SezioneSaldo movements={movements} />}
+
             {!loading && activeTab === 'budget' && (
               <SezioneBudget
                 userId={userId}
@@ -129,7 +142,10 @@ export function MainApp({ userId }: { userId: string }) {
                 showToast={showToast}
               />
             )}
-            {!loading && activeTab === 'obiettivi' && <SezioneObiettivi userId={userId} goals={goals} onSaved={loadData} showToast={showToast} />}
+
+            {!loading && activeTab === 'obiettivi' && (
+              <SezioneObiettivi userId={userId} goals={goals} onSaved={loadData} showToast={showToast} />
+            )}
           </main>
         </div>
 
